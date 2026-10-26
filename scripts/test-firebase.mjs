@@ -1,0 +1,14 @@
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+const env = { ...process.env };
+const localJava = path.resolve('.cache/java/jdk-21.0.12.1+1-jre');
+const pathKey = Object.keys(env).find(key => key.toLowerCase() === 'path') || 'PATH';
+const searchPath = env[pathKey] || '';
+for (const key of Object.keys(env)) if (key.toLowerCase() === 'path') delete env[key];
+if (process.platform === 'win32' && !env.JAVA_HOME && existsSync(path.join(localJava, 'bin/java.exe'))) env.JAVA_HOME = localJava;
+env[pathKey] = [path.dirname(process.execPath), ...(env.JAVA_HOME ? [path.join(env.JAVA_HOME, 'bin')] : []), searchPath].join(path.delimiter);
+const rules = process.argv[2] === 'rules';
+const child = spawn(process.execPath, ['node_modules/firebase-tools/lib/bin/firebase.js', 'emulators:exec', '--project', 'demo-birlikteizle', '--only', rules ? 'database' : 'database,auth', `node --test --test-force-exit test/${rules ? 'firebase-rules' : 'firebase-client'}.mjs`], { env, stdio: 'inherit' });
+child.on('error', error => { console.error(error.message); process.exitCode = 1; });
+child.on('exit', code => { process.exitCode = code ?? 1; });
