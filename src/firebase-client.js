@@ -31,7 +31,6 @@ export async function createFirebaseBackend(options = {}) {
     let disposed = false;
     const now = () => Date.now() + offset;
     const roomRef = (id, child = '') => ref(db, `${ROOM_NAMESPACE}/${id}${child ? `/${child}` : ''}`);
-    let lastSent = 0;
     const activityPaths = id => ({ [`${ROOM_NAMESPACE}/${id}/lifecycle/lastActiveAt`]: serverTimestamp(), [`roomIndex/${id}`]: serverTimestamp() });
     async function touch(id) { await update(ref(db), activityPaths(id)); }
     async function cleanupExpired() {
@@ -75,17 +74,19 @@ export async function createFirebaseBackend(options = {}) {
         if (action === 'message') {
           const text = String(input.text || '').trim().slice(0, 1000);
           if (!text) throw new Error('Mesaj boş olamaz.');
-          if (Date.now() - lastSent < 600) throw new Error('Biraz yavaş, mesajını az sonra gönder.');
-          lastSent = Date.now();
+          const messageId = crypto.randomUUID();
           let messages = raw.messages || {};
-          for (let attempt = 0; attempt < 4; attempt++) {
+          for (let attempt = 0; attempt < 16; attempt++) {
             const slot = messageSlot(messages);
             const previousId = messages[slot]?.id || null;
             const result = await runTransaction(roomRef(id, `messages/${slot}`), current => {
-              if ((current?.id || null) !== previousId) return;
-              return { id: crypto.randomUUID(), memberId: user.uid, name: raw.members[user.uid].name, text, at: serverTimestamp() };
+              // A transaction may initially receive null before its server value is cached.
+              // Propose the write so Firebase can retry with the authoritative value.
+              if (current && current.id !== previousId) return;
+              return { id: messageId, memberId: user.uid, name: raw.members[user.uid].name, text, at: serverTimestamp() };
             }, { applyLocally: false });
             if (result.committed) return { ok: true };
+            await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 40));
             messages = (await get(roomRef(id, 'messages'))).val() || {};
           }
           throw new Error('Mesaj gönderilemedi. Yeniden dene.');
