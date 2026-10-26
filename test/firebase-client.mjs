@@ -7,7 +7,7 @@ async function until(predicate) {
   while (!predicate()) { if (Date.now() > deadline) throw new Error('Realtime state timed out'); await new Promise(resolve => setTimeout(resolve, 30)); }
 }
 
-test('two Firebase clients create a room, exchange chat and synchronize video through real rules', { timeout: 20000 }, async () => {
+test('two Firebase clients create a room, exchange chat and synchronize video through real rules', { timeout: 60000 }, async () => {
   const config = { apiKey: 'demo-api-key', projectId: 'demo-birlikteizle', databaseURL: 'https://demo-birlikteizle-default-rtdb.firebaseio.com' };
   const host = await createFirebaseBackend({ config, appName: 'host-client', emulators: true });
   const guest = await createFirebaseBackend({ config, appName: 'guest-client', emulators: true });
@@ -23,6 +23,10 @@ test('two Firebase clients create a room, exchange chat and synchronize video th
     if (failure) throw failure;
     await guest.request('message', id, { text: 'Merhaba 🍿' });
     await until(() => hostState?.messages.some(message => message.text === 'Merhaba 🍿'));
+    const burst = Array.from({ length: 6 }, (_, i) => `burst-${i}`);
+    await Promise.all(burst.map((text, i) => (i % 2 ? host : guest).request('message', id, { text })));
+    await until(() => burst.every(text => hostState?.messages.some(message => message.text === text)));
+    for (const text of burst) assert.equal(hostState.messages.filter(message => message.text === text).length, 1);
     await assert.rejects(guest.request('playback', id, { time: 5, playing: true }), /yetkin/);
     await host.request('video', id, { title: 'Test video', url: 'https://example.com/movie.mp4' });
     await until(() => guestState?.queue.length === 2);
@@ -47,6 +51,17 @@ test('two Firebase clients create a room, exchange chat and synchronize video th
     await until(() => !guestState?.permissions[joinedGuest.memberId]?.playback);
     await until(() => guestState?.playback.playing === false);
     await assert.rejects(guest.request('playback', id, { time: 10, playing: true }), /yetkin/);
+    // Fill the bounded history without a subscription, then race both clients
+    // against the same oldest slot. A transaction's cold null must not abort it.
+    const fullRoom = (await host.request('create')).id;
+    await host.request('join', fullRoom, { name: 'Owner' });
+    for (let i = 0; i < 150; i++) await host.request('message', fullRoom, { text: `history-${i}` });
+    await guest.request('join', fullRoom, { name: 'Guest' });
+    const replacementBurst = ['full-a', 'full-b', 'full-c', 'full-d'];
+    await Promise.all(replacementBurst.map((text, i) => (i % 2 ? host : guest).request('message', fullRoom, { text })));
+    const fullHistory = (await host.request('join', fullRoom, { name: 'Owner' })).room.messages;
+    assert.equal(fullHistory.length, 150);
+    for (const text of replacementBurst) assert.equal(fullHistory.filter(message => message.text === text).length, 1);
     await host.cleanupExpired();
     await host.dispose();
     await until(() => guestState?.members.length === 1);
