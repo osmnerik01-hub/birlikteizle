@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kaynak pencere eklentisi — Birlikte İzle</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/player.css"></head>
+<body><main class="extension-doc"><a href="/">← Birlikte İzle</a>
+<h1>Kendi sitesinde aç. Birlikte yönet.</h1>
+<p>Videonun bulunduğu web sayfasını odana ekle. Eklenti siteyi ayrı bir pencerede açar. Video orada oynarken odadaki oynat, durdur ve zaman çubuğu kaynak oynatıcıyı yönetir. Arkadaşının penceresi odanın zamanına eşitlenir.</p>
+<a class="button primary" href="/birlikteizle-extension.zip" download>Chrome eklentisi 0.5.2 — İndir ↓</a>
+<div class="callout"><strong>Zaten kurduysan güncelle:</strong> Yeni ZIP dosyasını çıkarıp eski eklenti klasöründeki dosyaların yerine koy. <code>chrome://extensions</code> sayfasında Birlikte İzle kartının yenile düğmesine bas. Ardından oda ve kaynak sayfalarını yenile. Eklenti sürümü <strong>0.5.2</strong> olmalı. Her katılımcı güncellemeli.</div>
+<h2>İlk kurulum</h2><ol>
+<li>ZIP dosyasını indirip bir klasöre çıkar. Dosyaları bu klasörde tut.</li>
+<li>Chrome adres çubuğuna <code>chrome://extensions</code> yaz.</li>
+<li><strong>Geliştirici modu</strong> seçeneğini aç. <strong>Paketlenmemiş öğe yükle</strong> düğmesiyle, içinde <code>manifest.json</code> bulunan klasörü seç.</li>
+<li>Chrome araç çubuğundaki eklenti simgesinden <strong>Birlikte İzle</strong> penceresini aç. <strong>Video sayfalarında erişimi etkinleştir</strong> düğmesine basıp site erişimini onayla.</li>
+<li>Oda sayfasını yenile. Arkadaşın da eklentiyi kendi Chrome tarayıcısında kurmalı.</li></ol>
+<h2>Birlikte izlemeye başla</h2><ol>
+<li><strong>Video ekle</strong> ile filmin veya bölümün <strong>web sayfası adresini</strong> ekle ve listeden seç. Kaynak sayfa için algılanan <code>.m3u8</code> bağlantısını kullanmana gerek yok.</li>
+<li>Her katılımcı odadaki <strong>Kaynak penceresini aç</strong> düğmesine bassın. Kaynak site ayrı pencerede açılır. Oturum açma veya doğrulama gerekiyorsa herkes kendisi tamamlasın.</li>
+<li>Kaynak oynatıcıda aynı bölümü ve sunucuyu seçip videoyu bir kez başlat. <strong>Odaya dön</strong> düğmesiyle sohbet ve kontrollerin bulunduğu odaya dönebilirsin.</li>
+<li>Odada <strong>Oynatıcı bağlı</strong> yazısını gördüğünde oda sahibi veya oynatma yetkisi verdiği katılımcı oynatmayı yönetsin. Güncel saniye ve toplam süre odada görünür; zaman çubuğu ve 10 saniye sarma düğmeleri kaynak oynatıcıyı kontrol eder.</li>
+<li>Arkadaşının penceresi oynatma, durdurma ve konum değişikliklerine uyar. Hazır olduğunda <strong>Odayla senkronize</strong> görünür. Kaynak pencerelerini ve oda sayfalarını açık tutun.</li></ol>
+<div class="callout">Video kaynak sitede oynar; yayın bağlantısını başka sunucuya taşımayız. Odanın tam ekran düğmesi kaynak penceresini tam ekran yapar. <strong>Kaynak penceresine git</strong> düğmesi mevcut pencereyi öne getirir.</div>
+<h2>HLS hatası gördüysen</h2><p>Önceden eklediğin yayın yerine filmin veya bölümün web sayfasını yeniden ekleyip listeden seç. Yeni pencere akışı videoyu kaynak sitesinde oynattığından, yayını oda alan adından indirmeye çalışmaz.</p>
+<h2>Ses ve altyazılar</h2><p>Kaynağın sunduğu erişilebilir ses ve altyazı kayıtları odadaki menülere gelir. Bu seçimler kişiseldir. Kaynak kendi kapalı menüsünü kullanıyorsa seçim kaynak sayfadan yapılır. Doğrudan HLS/DASH bağlantıları için site içindeki oynatıcı da kullanılabilir. MKV dosyalarının oynatılabilmesi içindeki codec’lerin Chrome tarafından desteklenmesine bağlıdır.</p>
+<h2>Destek ve erişim</h2><p>HTML5 video ve izin verilen iframe’lerde çalışır. Her katılımcının kaynağa kendi erişimiyle ulaşması gerekir. Bot doğrulaması, DRM, kapalı oynatıcılar ve tarayıcının izin vermediği sayfalar desteği sınırlayabilir. Kaynakların aynı bölüm ve sürüm olması gerekir; farklı reklamlar veya video uzunlukları eşitlemeyi etkileyebilir. Tarayıcının oda sayfasını tamamen uyutması bağlantıyı durdurabilir.</p>
+<h2>İzinler ve durdurma</h2><p>İsteğe bağlı site erişimi, kaynak oynatıcılarını ve farklı alan adlarındaki iframe’leri kontrol etmek içindir. Algılama yalnızca odadan açılan kaynak pencerelerinde etkinleşir. Çerez, şifre veya yetkilendirme başlığı okunmaz. Ağ trafiğini dinleme izni kullanılmaz. Eklenti penceresinden <strong>Tüm kaynak bağlantılarını durdur</strong> diyebilir veya Chrome’dan site erişimini kaldırabilirsin.</p>
+</main></body></html>
