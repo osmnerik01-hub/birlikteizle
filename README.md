@@ -1,4 +1,4 @@
-# Birlikte İzle
+# ▶ birlikteizle.
 
 Paylaşılabilir odalar, eşzamanlı video oynatma ve canlı sohbet uygulaması. **Firebase Spark** ve **Node.js + SQLite** olarak iki çalışma biçimi bulunur. Node.js **24.x** gerekir. Node sunucusu harici çalışma zamanı paketi kullanmaz; Firebase derleme/yayınlama/test araçları geliştirme bağımlılıklarıdır.
 

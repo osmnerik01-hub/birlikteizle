@@ -213,7 +213,7 @@ const server = http.createServer(async (req, res) => {
     else if (url.pathname === '/' || /^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/.test(url.pathname)) file = path.join(root, 'public', 'index.html');
     else fail('Sayfa bulunamadı.', 404);
     let info; try { info = await stat(file); } catch { fail('Dosya bulunamadı.', 404); }
-    const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.zip': 'application/zip', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mkv': 'video/x-matroska', '.webm': 'video/webm', '.ogg': 'video/ogg', '.ogv': 'video/ogg', '.mov': 'video/quicktime' };
+    const types = { '.svg': 'image/svg+xml', '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.zip': 'application/zip', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mkv': 'video/x-matroska', '.webm': 'video/webm', '.ogg': 'video/ogg', '.ogv': 'video/ogg', '.mov': 'video/quicktime' };
     const headers = { 'Content-Type': types[path.extname(file)], 'Accept-Ranges': 'bytes', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin' };
     let start = 0, end = info.size - 1, status = 200;
     if (req.headers.range) {
@@ -241,4 +241,4 @@ function shutdown() {
   setTimeout(() => process.exit(1), 10000).unref();
 }
 process.on('SIGTERM', shutdown); process.on('SIGINT', shutdown);
-server.listen(Number(process.env.PORT || 3000), process.env.HOST || '0.0.0.0', () => console.log(`Birlikte İzle hazır: http://localhost:${server.address().port}`));
+server.listen(Number(process.env.PORT || 3000), process.env.HOST || '0.0.0.0', () => console.log(`▶ birlikteizle. hazır: http://localhost:${server.address().port}`));
