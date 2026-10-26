@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Birlikte İzle — Kaynak Oynatıcı",
+  "version": "0.5.2",
+  "minimum_chrome_version": "119",
+  "description": "Kaynak siteyi ayrı pencerede açar; HTML5 videoyu odanın kontrolleriyle senkronize eder.",
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://your-firebase-project.web.app/*",
+    "https://your-firebase-project.firebaseapp.com/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Birlikte İzle"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://your-firebase-project.web.app/*",
+        "https://your-firebase-project.firebaseapp.com/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*"
+      ],
+      "js": [
+        "bridge.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
