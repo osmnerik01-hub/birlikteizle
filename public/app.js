@@ -1,3 +1,4 @@
+import { createMessageQueue } from '/message-queue.js';
 import { WatchPlayer } from '/player.js';
 import { resolveMediaSource } from '/media-source.js';
 import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js';
@@ -83,8 +84,16 @@ function render(next) {
 }
 video.addEventListener('play', () => { covered = false; $('#video-cover').hidden = true; });
 $('#start-video').onclick = async () => { if (state) { covered = false; $('#video-cover').hidden = true; await player.userToggle(); } };
-async function sendMessage(text) { if (!state) return; await api('message', { text }); }
-$('#chat-form').onsubmit = async event => { event.preventDefault(); const input = $('#message'); const text = input.value.trim(); if (!text) return; try { await sendMessage(text); input.value = ''; $('#chat-content').scrollTop = $('#chat-content').scrollHeight; } catch (error) { toast(error.message, true); } };
+const sendMessage = createMessageQueue(async text => { if (!state || state.closed) throw new Error('Mesaj göndermek için açık bir odaya katılmalısın.'); await api('message', { text }); });
+$('#chat-form').onsubmit = async event => {
+  event.preventDefault();
+  const input = $('#message'), text = input.value.trim();
+  if (!text) return;
+  // Clear immediately, so a pending write cannot duplicate or erase the next draft.
+  input.value = '';
+  try { await sendMessage(text); $('#chat-content').scrollTop = $('#chat-content').scrollHeight; }
+  catch (error) { input.value = input.value ? `${text}\n${input.value}` : text; toast(error.message, true); }
+};
 document.querySelectorAll('[data-reaction]').forEach(button => button.onclick = () => sendMessage(button.dataset.reaction).catch(error => toast(error.message, true)));
 function showTab(members) { $('#chat-content').hidden = members; $('#members-list').hidden = !members; $('#messages-tab').classList.toggle('selected', !members); $('#members-tab').classList.toggle('selected', members); }
 $('#messages-tab').onclick = () => showTab(false); $('#members-tab').onclick = () => showTab(true);
