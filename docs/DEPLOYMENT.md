@@ -73,3 +73,12 @@ Yedek komutları Linux shell içindir. Çalışmakta olan SQLite dosyasını tek
 Sunucu entegrasyon testleri `npm test` ile yerel olarak çalıştırılır. Docker imajı, gerçek DNS/sertifika alma ve dış ağ erişimi dağıtım ortamında ayrıca doğrulanmalıdır. Bu dosyaların hazırlanması sitenin internete yayımlandığı anlamına gelmez.
 
 Başvuru: [Caddy reverse proxy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy), [Docker kalıcı volume'ler](https://docs.docker.com/engine/storage/volumes/), [Node.js SQLite](https://nodejs.org/docs/latest-v24.x/api/sqlite.html).
+
+
+## Güncellemeler ve tarayıcı önbelleği
+
+`npm run build:firebase`, yayımlanan dosyalardan kararlı bir içerik sürümü üretir. HTML, stil, simge ve JavaScript modüllerinin yerel adresleri `?v=...` ile güncellenir. Dosyalar değişmezse sürüm aynı kalır. Firebase Hosting yayını bu derlemeyi otomatik çalıştırır; Node dağıtımında sunucuyu başlatmadan önce derlemeyi çalıştırın.
+
+HTML ve uygulama dosyaları yeniden doğrulanır; `build-info.json` önbelleksiz kontrol edilir. Açık sekme, görünürken dakikada bir ve sekmeye geri dönüldüğünde yeni sürümü kontrol eder. Yeni sürüm varsa Yenile bildirimi gösterilir; izleme kendiliğinden kesilmez. Yenileme düğmesi sohbet taslağını aynı sekmede geri getirir ve mesaj kuyruğu tamamlanmadan yenilemez. Çerezler, Firebase giriş kimliği ve oda sahipliği silinmez.
+
+Tarayıcı geçmişini veya site verilerini temizlemek güncelleme yöntemi değildir. Chrome eklentisi ayrı bir kurulumdur; eklenti güncellendiğinde açık oda/kaynak sekmelerini yeniden açmak gerekebilir.

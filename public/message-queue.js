@@ -1,7 +1,7 @@
 // Keep writes ordered without rejecting ordinary short bursts of chat messages.
 export function createMessageQueue(send, { interval = 650, maxPending = 20, now = Date.now, wait = ms => new Promise(resolve => setTimeout(resolve, ms)) } = {}) {
   let tail = Promise.resolve(), pending = 0, lastStarted = -Infinity;
-  return text => {
+  const enqueue = text => {
     if (pending >= maxPending) return Promise.reject(new Error('Mesajlar sırayla gönderiliyor. Kısa bir süre bekle; yazdığın mesaj korunuyor.'));
     pending++;
     const result = tail.then(async () => {
@@ -13,4 +13,6 @@ export function createMessageQueue(send, { interval = 650, maxPending = 20, now 
     tail = result.catch(() => {}).finally(() => { pending--; });
     return result;
   };
+  Object.defineProperty(enqueue, 'pending', { get: () => pending });
+  return enqueue;
 }

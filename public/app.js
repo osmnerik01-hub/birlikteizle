@@ -1,7 +1,7 @@
-import { createMessageQueue } from '/message-queue.js';
-import { WatchPlayer } from '/player.js';
-import { resolveMediaSource } from '/media-source.js';
-import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js';
+import { createMessageQueue } from '/message-queue.js?v=a7defc4872102c29';
+import { WatchPlayer } from '/player.js?v=a7defc4872102c29';
+import { resolveMediaSource } from '/media-source.js?v=a7defc4872102c29';
+import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=a7defc4872102c29';
 const $ = selector => document.querySelector(selector);
 const video = $('#video');
 let roomId = location.pathname.match(/^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/)?.[1];
@@ -15,9 +15,9 @@ const player = new WatchPlayer(video, {
   onError: message => toast(message, true), onNotice: message => toast(message)
 });
 let firebaseBackend;
-const backendReady = fetch('/app-config.json').then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
+const backendReady = fetch('/app-config.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
   if (config.backend !== 'firebase') return;
-  const { createFirebaseBackend } = await import('/firebase-client.js');
+  const { createFirebaseBackend } = await import('/firebase-client.js?v=a7defc4872102c29');
   firebaseBackend = await createFirebaseBackend();
   const sweep = () => firebaseBackend.cleanupExpired().catch(() => {});
   sweep(); setInterval(sweep, 10 * 60 * 1000);
@@ -85,6 +85,7 @@ function render(next) {
 video.addEventListener('play', () => { covered = false; $('#video-cover').hidden = true; });
 $('#start-video').onclick = async () => { if (state) { covered = false; $('#video-cover').hidden = true; await player.userToggle(); } };
 const sendMessage = createMessageQueue(async text => { if (!state || state.closed) throw new Error('Mesaj göndermek için açık bir odaya katılmalısın.'); await api('message', { text }); });
+window.addEventListener('app-before-update', event => { if (sendMessage.pending) { event.preventDefault(); toast('Mesajların gönderiliyor. Tamamlanınca yeniden Yenile düğmesine bas.'); } });
 $('#chat-form').onsubmit = async event => {
   event.preventDefault();
   const input = $('#message'), text = input.value.trim();

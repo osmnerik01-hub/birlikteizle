@@ -82,7 +82,14 @@ test('uploads require host authorization and support byte ranges for seeking', a
 });
 
 test('room routes serve the app and missing rooms return useful errors', async () => {
-  assert.equal((await fetch(`${base}/room/${room}`)).status, 200);
+  const page = await fetch(`${base}/room/${room}`);
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get('cache-control'), /no-cache.*must-revalidate/);
+  for (const asset of ['/message-queue.js', '/update-client.js', '/favicon.svg']) {
+    const response = await fetch(`${base}${asset}?v=0123456789abcdef`);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get('cache-control'), /no-cache/);
+  }
   assert.equal((await post('/00000000/join', { name: 'Test' })).status, 404);
   assert.equal((await post(`/${room}/message`, { text: 'hello' }, 'invalid')).status, 401);
   assert.equal((await fetch(`${base}/server.js`)).status, 404);

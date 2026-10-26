@@ -26,3 +26,5 @@ exports/
 *serviceAccount*.json
 *.pem
 *.key
+
+public/build-info.json

@@ -209,12 +209,13 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Cache-Control', 'private, no-store');
       file = path.join(uploadDir, path.basename(url.pathname));
     }
-    else if (['/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
+    else if (['/favicon.svg', '/message-queue.js', '/update-client.js', '/build-info.json', '/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
     else if (url.pathname === '/' || /^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/.test(url.pathname)) file = path.join(root, 'public', 'index.html');
     else fail('Sayfa bulunamadı.', 404);
     let info; try { info = await stat(file); } catch { fail('Dosya bulunamadı.', 404); }
-    const types = { '.svg': 'image/svg+xml', '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.zip': 'application/zip', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mkv': 'video/x-matroska', '.webm': 'video/webm', '.ogg': 'video/ogg', '.ogv': 'video/ogg', '.mov': 'video/quicktime' };
+    const types = { '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.zip': 'application/zip', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.mkv': 'video/x-matroska', '.webm': 'video/webm', '.ogg': 'video/ogg', '.ogv': 'video/ogg', '.mov': 'video/quicktime' };
     const headers = { 'Content-Type': types[path.extname(file)], 'Accept-Ranges': 'bytes', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'same-origin' };
+    if (!url.pathname.startsWith('/uploads/')) headers['Cache-Control'] = url.pathname === '/build-info.json' ? 'no-store' : 'no-cache, max-age=0, must-revalidate';
     let start = 0, end = info.size - 1, status = 200;
     if (req.headers.range) {
       const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
