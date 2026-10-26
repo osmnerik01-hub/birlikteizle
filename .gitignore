@@ -1,0 +1,24 @@
+node_modules/
+data/
+.env
+*.log
+.firebase/
+public/firebase-client.js
+public/admin-client.js
+public/player.js
+public/assets/
+public/birlikteizle-extension.zip
+firebase-debug.*
+.cache/
+database-debug.log
+ui-debug.log
+
+# Local configuration, credentials and exports
+.env.*
+!.env.example
+exports/
+*.zip
+*service-account*.json
+*serviceAccount*.json
+*.pem
+*.key

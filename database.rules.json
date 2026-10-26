@@ -1,0 +1,181 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "birlikteRooms": {
+      "$room": {
+        ".read": "(auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid)) || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())",
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) && !newData.exists() || (auth != null && !newData.exists() && (!data.exists() || (!data.child('presence').exists() && (data.child('lifecycle/lastActiveAt').isNumber() ? data.child('lifecycle/lastActiveAt').val() : data.child('meta/createdAt').val()) <= now - 86400000))) || (auth != null && !data.exists() && newData.exists() && $room.matches(/^[a-f0-9-]{36}$/) && newData.child('meta/host').val() === auth.uid && newData.child('members').hasChild(auth.uid))",
+        ".validate": "newData.hasChildren(['meta', 'members', 'queue', 'playback']) && newData.child('queue').hasChild(newData.child('playback/videoId').val())",
+        "meta": {
+          ".read": "auth != null",
+          ".validate": "newData.hasChildren(['id', 'title', 'host', 'createdAt'])",
+          "id": {
+            ".validate": "newData.val() === $room"
+          },
+          "title": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 70",
+            ".write": "(auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()))"
+          },
+          "host": {
+            ".validate": "newData.isString() && (newData.val() === data.val() || (!data.exists() && newData.val() === auth.uid) || ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) && root.child('birlikteRooms').child($room).child('members').hasChild(newData.val())))",
+            ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber() && (newData.val() === data.val() || (!data.exists() && newData.val() === now))"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "members": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('birlikteRooms').child($room).child('meta').exists() && root.child('birlikteRooms').child($room).child('closed').val() !== true && newData.exists()",
+            ".validate": "newData.hasChildren(['id', 'name']) && $uid === auth.uid",
+            "id": {
+              ".validate": "newData.val() === $uid"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 24"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "presence": {
+          "$uid": {
+            "$connection": {
+              ".write": "auth != null && auth.uid === $uid && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid)",
+              ".validate": "newData.val() === true && $connection.length <= 40"
+            }
+          }
+        },
+        "queue": {
+          "$slot": {
+            ".write": "root.child('birlikteRooms').child($room).child('closed').val() !== true && ((auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())) || (auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('permissions').child(auth.uid).child('manageQueue').val() === true) || ((auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('permissions').child(auth.uid).child('addVideo').val() === true) && !data.exists() && newData.exists()))",
+            ".validate": "$slot.matches(/^([0-9]|[1-4][0-9])$/) && newData.hasChildren(['id', 'title', 'url', 'source', 'order'])",
+            "id": {
+              ".validate": "newData.val() === $slot"
+            },
+            "title": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120"
+            },
+            "url": {
+              ".validate": "newData.isString() && newData.val().length <= 2048 && newData.val().matches(/^https:\\/\\/[a-zA-Z0-9.-]+(:[0-9]+)?\\/[^ @]*$/)"
+            },
+            "source": {
+              ".validate": "newData.isString() && newData.val().length <= 80"
+            },
+            "order": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now"
+            },
+            "$other": {
+              ".validate": false
+            },
+            "kind": {
+              ".validate": "newData.isString() && (newData.val() === 'video' || newData.val() === 'hls' || newData.val() === 'dash' || newData.val() === 'page')"
+            }
+          }
+        },
+        "playback": {
+          ".write": "root.child('birlikteRooms').child($room).child('closed').val() !== true && ((auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())) || ((auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('permissions').child(auth.uid).child('playback').val() === true) && newData.child('videoId').val() === data.child('videoId').val()) || ((auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('permissions').child(auth.uid).child('manageQueue').val() === true) && newData.child('videoId').val() !== data.child('videoId').val() && newData.child('playing').val() === false && newData.child('time').val() === 0)) && newData.exists()",
+          ".validate": "newData.hasChildren(['videoId', 'time', 'playing', 'updatedAt', 'controller'])",
+          "videoId": {
+            ".validate": "newData.isString() && newData.val().matches(/^([0-9]|[1-4][0-9])$/)"
+          },
+          "time": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 604800"
+          },
+          "playing": {
+            ".validate": "newData.isBoolean()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          },
+          "controller": {
+            ".validate": "newData.isString() && (newData.val() === auth.uid || ((auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())) && newData.val() === data.val()))"
+          }
+        },
+        "messages": {
+          "$slot": {
+            ".write": "(auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('closed').val() !== true && newData.exists()) || ((auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) && !newData.exists())",
+            ".validate": "$slot.matches(/^([0-9]|[1-9][0-9]|1[0-4][0-9])$/) && newData.hasChildren(['id', 'memberId', 'name', 'text', 'at'])",
+            "id": {
+              ".validate": "newData.isString() && newData.val().length === 36"
+            },
+            "memberId": {
+              ".validate": "newData.val() === auth.uid"
+            },
+            "name": {
+              ".validate": "newData.val() === root.child('birlikteRooms').child($room).child('members').child(auth.uid).child('name').val()"
+            },
+            "text": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+            },
+            "at": {
+              ".validate": "newData.isNumber() && newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) && !newData.exists()"
+        },
+        "$other": {
+          ".validate": false
+        },
+        "closed": {
+          ".write": "(auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()))",
+          ".validate": "newData.isBoolean()"
+        },
+        "lifecycle": {
+          "lastActiveAt": {
+            ".write": "auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid)",
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "permissions": {
+          "$uid": {
+            ".write": "(auth != null && root.child('birlikteRooms').child($room).child('meta/host').val() === auth.uid || (auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()))",
+            ".validate": "root.child('birlikteRooms').child($room).child('members').hasChild($uid) && newData.hasChildren(['addVideo', 'manageQueue', 'playback'])",
+            "addVideo": {
+              ".validate": "newData.isBoolean()"
+            },
+            "manageQueue": {
+              ".validate": "newData.isBoolean()"
+            },
+            "playback": {
+              ".validate": "newData.isBoolean()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
+    },
+    "siteConfig": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())",
+      ".write": false
+    },
+    "roomIndex": {
+      ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) || (auth != null && root.child('cleanupClock').isNumber() && query.orderByValue === true && query.endAt === root.child('cleanupClock').val() - 86400000 && query.limitToFirst > 0 && query.limitToFirst <= 50)",
+      ".indexOn": ".value",
+      "$room": {
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) || ((auth != null && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid)) && newData.val() === now) || (auth != null && !newData.exists() && !root.child('birlikteRooms').child($room).exists())",
+        ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now"
+      }
+    },
+    "cleanupClock": {
+      ".read": "auth != null",
+      ".write": "auth != null && newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 60000)"
+    }
+  }
+}

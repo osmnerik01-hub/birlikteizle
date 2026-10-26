@@ -1,0 +1,28 @@
+{
+  "name": "birlikte-izle",
+  "version": "0.5.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test \"test/*.test.js\"",
+    "build:firebase": "node scripts/build-firebase.mjs",
+    "test:firebase": "npm run test:firebase:rules && npm run test:firebase:client",
+    "test:firebase:rules": "node scripts/test-firebase.mjs rules",
+    "test:firebase:client": "node scripts/test-firebase.mjs client",
+    "firebase:login": "firebase login --interactive",
+    "deploy:firebase": "firebase deploy --only hosting"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
+    "dashjs": "^5.2.1",
+    "esbuild": "^0.28.2",
+    "firebase": "^13.1.0",
+    "firebase-tools": "^15.34.1",
+    "hls.js": "^1.7.3"
+  }
+}
