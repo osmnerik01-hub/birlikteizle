@@ -38,7 +38,7 @@
     roomButton = document.createElement('div');
     roomButton.style.cssText = 'all:initial;position:fixed;top:12px;left:12px;z-index:2147483647';
     const shadow = roomButton.attachShadow({ mode: 'closed' });
-    shadow.innerHTML = '<style>button{font:600 13px system-ui;color:#f4eafd;background:#251632ed;border:1px solid #ac8bc4;border-radius:9px;padding:10px 14px;cursor:pointer;box-shadow:0 4px 20px #0006}button:hover{background:#49305e}button:focus-visible{outline:3px solid #e1c4ff}</style><button type="button">↗ Odaya dön · Birlikte İzle</button>';
+    shadow.innerHTML = '<style>button{font:600 13px system-ui;color:#f4eafd;background:#251632ed;border:1px solid #ac8bc4;border-radius:9px;padding:10px 14px;cursor:pointer;box-shadow:0 4px 20px #0006}button:hover{background:#49305e}button:focus-visible{outline:3px solid #e1c4ff}</style><button type="button">↗ Odaya dön · ▶ birlikteizle.</button>';
     shadow.querySelector('button').onclick = () => send({ action: 'FOCUS_ROOM' });
     document.documentElement.append(roomButton);
   }
