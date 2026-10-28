@@ -109,6 +109,19 @@ test('only the configured verified Google account may administer all rooms', asy
   await assertSucceeds(set(ref(admin, `${p}/closed`), false));
 });
 
+test('network locations are private to admin and strictly bounded', async () => {
+  const path = `roomLocations/${id}/guest`;
+  const location = { region: 'Istanbul', country: 'TR', at: serverTimestamp() };
+  await assertSucceeds(set(ref(db('guest'), path), location));
+  await assertFails(get(ref(db('guest'), path)));
+  await assertFails(get(ref(db('host'), `roomLocations/${id}`)));
+  await assertFails(set(ref(db('host'), path), location));
+  await assertFails(set(ref(db('guest'), path), { ...location, ip: '192.0.2.1' }));
+  await assertFails(set(ref(db('guest'), path), { ...location, region: 'x'.repeat(81) }));
+  const admin = env.authenticatedContext('google-admin', { email: 'owner@example.com', email_verified: true, firebase: { sign_in_provider: 'google.com' } }).database();
+  assert.equal((await assertSucceeds(get(ref(admin, path)))).val().region, 'Istanbul');
+});
+
 test('cleanup can delete expired empty rooms only, and the expiry index reveals no room content', async () => {
   const expired = '3a7b0c58-0cda-42ab-8e9d-71f274feeb44', active = '4a7b0c58-0cda-42ab-8e9d-71f274feeb44', fresh = '5a7b0c58-0cda-42ab-8e9d-71f274feeb44';
   const old = Date.now() - 90000000;

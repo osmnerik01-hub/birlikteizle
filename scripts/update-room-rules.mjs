@@ -42,4 +42,16 @@ rules.rules.roomIndex = {
   }
 };
 rules.rules.cleanupClock = { '.read': 'auth != null', '.write': 'auth != null && newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 60000)' };
+rules.rules.roomLocations = { '$room': {
+  '.read': admin,
+  '.write': `${admin} && !newData.exists() || (auth != null && !newData.exists() && !${base}.exists())`,
+  '$uid': {
+    '.write': `auth != null && auth.uid === $uid && ${base}.child('members').hasChild(auth.uid) && ${open}`,
+    '.validate': "newData.hasChildren(['region', 'country', 'at'])",
+    region: { '.validate': 'newData.isString() && newData.val().length > 0 && newData.val().length <= 80' },
+    country: { '.validate': 'newData.isString() && newData.val().matches(/^[A-Z]{2}$/)' },
+    at: { '.validate': 'newData.isNumber() && newData.val() === now' },
+    '$other': { '.validate': false }
+  }
+} };
 await writeFile('database.rules.json', JSON.stringify(rules, null, 2) + '\n');

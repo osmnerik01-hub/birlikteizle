@@ -62,10 +62,10 @@ export function createAdminBackend(options = {}) {
       const last = entries.at(-1);
       return { rooms, cursor: entries.length === 50 ? { id: last[0], at: last[1] } : null };
     },
-    async room(id) { requireAdmin(); const raw = (await get(roomRef(id))).val(); return { raw, room: roomSnapshot(raw, Date.now()) }; },
+    async room(id) { requireAdmin(); const raw = (await get(roomRef(id))).val(); const locations = (await get(ref(db, `roomLocations/${id}`))).val() || {}; return { raw, locations, room: roomSnapshot(raw, Date.now()) }; },
     async action(id, action, input = {}) {
       requireAdmin();
-      if (action === 'delete') { await update(ref(db), { [`${ROOM_NAMESPACE}/${id}`]: null, [`roomIndex/${id}`]: null }); return; }
+      if (action === 'delete') { await update(ref(db), { [`${ROOM_NAMESPACE}/${id}`]: null, [`roomIndex/${id}`]: null, [`roomLocations/${id}`]: null }); return; }
       const raw = (await get(roomRef(id))).val();
       if (!raw) throw new Error('Oda artık bulunmuyor.');
       if (action === 'closed') await set(roomRef(id, 'closed'), input.closed === true);
@@ -87,7 +87,7 @@ export function createAdminBackend(options = {}) {
       const index = (await get(query(ref(db, 'roomIndex'), orderByValue(), endAt(Date.now() - 86400000), limitToFirst(50)))).val() || {};
       for (const id of Object.keys(index).filter(id => index[id] <= Date.now() - 86400000)) {
         const result = await runTransaction(roomRef(id), raw => !raw ? null : idleRoom(raw) ? null : undefined, { applyLocally: false });
-        if (result.committed) { await remove(ref(db, `roomIndex/${id}`)); removed++; }
+        if (result.committed) { await remove(ref(db, `roomLocations/${id}`)); await remove(ref(db, `roomIndex/${id}`)); removed++; }
       }
       return { removed };
     }

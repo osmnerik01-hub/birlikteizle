@@ -1,3 +1,4 @@
+import { normalizeLocation } from './public/location.js';
 import http from 'node:http';
 import { randomUUID, createHash, timingSafeEqual } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
@@ -108,7 +109,7 @@ const server = http.createServer(async (req, res) => {
       const match = url.pathname.match(/^\/api\/admin\/rooms\/([a-f0-9-]{36})$/);
       if (!match) fail('Yönetim işlemi bulunamadı.', 404);
       const room = rooms.get(match[1]); if (!room) fail('Oda bulunamadı.', 404);
-      if (req.method === 'GET') return json(res, 200, { room: snapshot(room), raw: { members: Object.fromEntries([...room.members.values()].map(({ id, name }) => [id, { id, name }])) } });
+      if (req.method === 'GET') return json(res, 200, { locations: Object.fromEntries([...room.members.values()].filter(m => m.location).map(m => [m.id, m.location])), room: snapshot(room), raw: { members: Object.fromEntries([...room.members.values()].map(({ id, name }) => [id, { id, name }])) } });
       if (req.method !== 'POST') fail('Desteklenmeyen istek.', 405);
       const input = await body(req);
       if (input.action === 'delete') { await deleteRoom(room); return json(res, 200, { ok: true }); }
@@ -129,7 +130,7 @@ const server = http.createServer(async (req, res) => {
       const room = { id, title: String(input.title || 'Birlikte güzel bir akşam').slice(0, 70), host: null, members: new Map(), permissions: {}, queue: [{ ...sample }], messages: [], playback: { videoId: sample.id, time: 0, playing: false, updatedAt: Date.now() }, touchedAt: Date.now() };
       storage.save(room); rooms.set(id, room); return json(res, 201, { id });
     }
-    const match = url.pathname.match(/^\/api\/rooms\/([a-f0-9-]{8}|[a-f0-9-]{36})\/(join|events|message|video|playback|select|remove-video|permissions|upload|status)$/);
+    const match = url.pathname.match(/^\/api\/rooms\/([a-f0-9-]{8}|[a-f0-9-]{36})\/(join|location|events|message|video|playback|select|remove-video|permissions|upload|status)$/);
     if (match) {
       const room = rooms.get(match[1]); if (!room) fail('Bu oda bulunamadı. Yeni bir oda oluşturabilirsin.', 404);
       const action = match[2];
@@ -188,6 +189,11 @@ const server = http.createServer(async (req, res) => {
         broadcast(room); return json(res, 201, { ok: true });
       }
       const input = await body(req);
+      if (action === 'location' && req.method === 'POST') {
+        const location = normalizeLocation({ ...input.location, country_code: input.location?.country, success: true });
+        if (location) { member.location = { ...location, at: Date.now() }; storage.save(room); }
+        return json(res, 200, { ok: true });
+      }
       if (action === 'message') {
         const text = String(input.text || '').trim().slice(0, 1000); if (!text) fail('Mesaj boş olamaz.');
         const previous = room.messages.findLast(m => m.memberId === member.id); if (previous && Date.now() - previous.at < 400) fail('Biraz yavaş, mesajın az sonra gönderilebilir.', 429);
@@ -209,7 +215,7 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Cache-Control', 'private, no-store');
       file = path.join(uploadDir, path.basename(url.pathname));
     }
-    else if (['/admin-auth.js', '/favicon.svg', '/message-queue.js', '/update-client.js', '/build-info.json', '/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
+    else if (['/location.js', '/admin-auth.js', '/favicon.svg', '/message-queue.js', '/update-client.js', '/build-info.json', '/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
     else if (url.pathname === '/' || /^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/.test(url.pathname)) file = path.join(root, 'public', 'index.html');
     else fail('Sayfa bulunamadı.', 404);
     let info; try { info = await stat(file); } catch { fail('Dosya bulunamadı.', 404); }

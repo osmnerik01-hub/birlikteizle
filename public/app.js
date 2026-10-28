@@ -1,7 +1,8 @@
-import { createMessageQueue } from '/message-queue.js?v=fd7eadfc7efe2523';
-import { WatchPlayer } from '/player.js?v=fd7eadfc7efe2523';
-import { resolveMediaSource } from '/media-source.js?v=fd7eadfc7efe2523';
-import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=fd7eadfc7efe2523';
+import { createMessageQueue } from '/message-queue.js?v=3f4b4b03edee3b19';
+import { WatchPlayer } from '/player.js?v=3f4b4b03edee3b19';
+import { resolveMediaSource } from '/media-source.js?v=3f4b4b03edee3b19';
+import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=3f4b4b03edee3b19';
+import { approximateLocation } from '/location.js?v=3f4b4b03edee3b19';
 const $ = selector => document.querySelector(selector);
 const video = $('#video');
 let roomId = location.pathname.match(/^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/)?.[1];
@@ -17,7 +18,7 @@ const player = new WatchPlayer(video, {
 let firebaseBackend;
 const backendReady = fetch('/app-config.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
   if (config.backend !== 'firebase') return;
-  const { createFirebaseBackend } = await import('/firebase-client.js?v=fd7eadfc7efe2523');
+  const { createFirebaseBackend } = await import('/firebase-client.js?v=3f4b4b03edee3b19');
   firebaseBackend = await createFirebaseBackend();
   const sweep = () => firebaseBackend.cleanupExpired().catch(() => {});
   sweep(); setInterval(sweep, 10 * 60 * 1000);
@@ -42,6 +43,8 @@ async function join() {
   const result = await api('join', { name, token: saved?.token }); token = result.token; memberId = result.memberId;
   sessionStorage.setItem(sessionKey, JSON.stringify({ token, memberId, name })); render(result.room);
   updateProfile(); connect();
+  // Location lookup runs after joining and never blocks playback or chat.
+  approximateLocation().then(location => { if (location) return api('location', { location }); }).catch(() => {});
 }
 function connect() {
   if (firebaseBackend) {

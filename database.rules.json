@@ -176,6 +176,28 @@
     "cleanupClock": {
       ".read": "auth != null",
       ".write": "auth != null && newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 60000)"
+    },
+    "roomLocations": {
+      "$room": {
+        ".read": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val())",
+        ".write": "(auth != null && auth.token.email_verified === true && auth.token.firebase.sign_in_provider === 'google.com' && root.child('siteConfig/adminEmail').isString() && auth.token.email === root.child('siteConfig/adminEmail').val()) && !newData.exists() || (auth != null && !newData.exists() && !root.child('birlikteRooms').child($room).exists())",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && root.child('birlikteRooms').child($room).child('members').hasChild(auth.uid) && root.child('birlikteRooms').child($room).child('closed').val() !== true",
+          ".validate": "newData.hasChildren(['region', 'country', 'at'])",
+          "region": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 80"
+          },
+          "country": {
+            ".validate": "newData.isString() && newData.val().matches(/^[A-Z]{2}$/)"
+          },
+          "at": {
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }

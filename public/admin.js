@@ -1,5 +1,5 @@
-import { authErrorMessage } from '/admin-auth.js?v=fd7eadfc7efe2523';
-import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=fd7eadfc7efe2523';
+import { authErrorMessage } from '/admin-auth.js?v=3f4b4b03edee3b19';
+import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=3f4b4b03edee3b19';
 const $ = selector => document.querySelector(selector);
 let backend, selected, detail, cursor, rooms = [], toastTimer;
 function toast(message, error = false) { const el = $('#admin-toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 6000); }
@@ -49,6 +49,10 @@ function renderDetail() {
     top.append(name, role);
     if (person.id !== room.host) { const host = document.createElement('button'); host.className = 'button secondary'; host.textContent = 'Oda sahibi yap'; host.onclick = () => run(host, async () => { if (await confirmAction('Oda sahibini değiştir', `${person.name} bu odanın tüm yetkilerini alacak.`)) await perform('host', { memberId: person.id }); }); top.append(host); }
     row.append(top);
+    const location = detail.locations?.[person.id];
+    const place = document.createElement('small');
+    place.textContent = location ? `Yaklaşık il: ${location.region} (${location.country}) · ${date(location.at)} · IP tahmini` : 'Yaklaşık il: Belirlenemedi';
+    row.append(place);
     const permissions = permissionsFor(room, person.id), options = document.createElement('div'); options.className = 'permission-options';
     for (const [key, text] of Object.entries(PERMISSIONS)) {
       const label = document.createElement('label'), input = document.createElement('input'); input.type = 'checkbox'; input.checked = permissions[key]; input.disabled = person.id === room.host;
@@ -91,7 +95,7 @@ $('#logout').onclick = event => run(event.currentTarget, async () => { await bac
 
 async function start() {
   const config = await (await fetch('/app-config.json', { cache: 'no-store' })).json();
-  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=fd7eadfc7efe2523'); backend = createAdminBackend(); backend.watchIdentity(identity, loginError); }
+  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=3f4b4b03edee3b19'); backend = createAdminBackend(); backend.watchIdentity(identity, loginError); }
   else {
     $('#google-login').hidden = true; $('#node-login').hidden = false; $('#login-status').textContent = 'Sunucunun ADMIN_TOKEN anahtarıyla giriş yap.';
     $('#login-description').textContent = 'Bu sunucunun yönetici anahtarıyla odaları yönetebilirsin. İzleme odasındaki misafir kimliğin korunur.';

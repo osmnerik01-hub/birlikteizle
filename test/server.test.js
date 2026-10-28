@@ -54,6 +54,16 @@ test('rooms, identities and live events work for independent participants', asyn
   } finally { controller.abort(); }
 });
 
+test('network location is visible to admin only and excludes raw IP', async () => {
+  assert.equal((await post(`/${room}/location`, { location: { region: 'Istanbul', country: 'TR', ip: '192.0.2.1' } }, guest.token)).status, 200);
+  const response = await fetch(`${base}/api/admin/rooms/${room}`, { headers: { Authorization: `Bearer ${adminKey}` } });
+  const detail = await response.json();
+  assert.equal(detail.locations[guest.memberId].region, 'Istanbul');
+  assert.equal(detail.locations[guest.memberId].ip, undefined);
+  assert.equal(JSON.stringify(detail.room).includes('Istanbul'), false);
+  assert.equal((await post(`/${room}/location`, { location: { region: 'X', country: 'TR' } })).status, 401);
+});
+
 test('video links are validated and selecting a video resets playback', async () => {
   assert.equal((await post(`/${room}/video`, { url: 'javascript:alert(1)' }, host.token)).status, 400);
   assert.equal((await post(`/${room}/video`, { url: 'https://youtube.com/watch?v=test', title: 'Kaynak sayfa' }, host.token)).status, 200);

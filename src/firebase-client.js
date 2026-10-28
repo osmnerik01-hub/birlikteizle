@@ -1,3 +1,4 @@
+import { normalizeLocation } from '../public/location.js';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, signInAnonymously, connectAuthEmulator, signOut } from 'firebase/auth';
 import { getDatabase, ref, get, set, update, query, orderByValue, endAt, limitToFirst, onValue, onDisconnect, remove, push, serverTimestamp, runTransaction, connectDatabaseEmulator, goOffline } from 'firebase/database';
@@ -44,7 +45,7 @@ export async function createFirebaseBackend(options = {}) {
       }
       let removed = 0;
       for (const id of Object.keys(candidates.val() || {})) {
-        try { await remove(roomRef(id)); await remove(ref(db, `roomIndex/${id}`)); removed++; }
+        try { await remove(roomRef(id)); await remove(ref(db, `roomLocations/${id}`)); await remove(ref(db, `roomIndex/${id}`)); removed++; }
         catch (error) { if (!String(error.code).toLowerCase().includes('permission_denied') && !String(error.code).toLowerCase().includes('permission-denied')) throw error; }
       }
       return { removed };
@@ -66,6 +67,11 @@ export async function createFirebaseBackend(options = {}) {
           const room = (await get(roomRef(id))).val();
           cachedRooms.set(id, room);
           return { token: '', memberId: user.uid, room: roomSnapshot(room, now()) };
+        }
+        if (action === 'location') {
+          const location = normalizeLocation({ ...input.location, country_code: input.location?.country, success: true });
+          if (location) await set(ref(db, `roomLocations/${id}/${user.uid}`), { ...location, at: serverTimestamp() });
+          return { ok: true };
         }
         const raw = cachedRooms.get(id) || (await get(roomRef(id))).val();
         if (!raw) throw new Error('Oda bulunamadı.');

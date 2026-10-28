@@ -53,3 +53,6 @@ Konsoldaki bir COOP uyarısı tek başına CORS veya başarısız giriş kanıt�
 
 
 Yönetim panelinin veritabanı bağlantısı HTTPS long polling kullanır. WebSocket bağlantısının ağ veya tarayıcı tarafından engellendiği ortamlarda da çalışır. Firebase Hosting CSP politikasında Firebase veritabanı uçlarının script/iframe bağlantılarına izin verilmelidir; bu izinler Firebase SDK HTTP taşımasının gereğidir. Kimlik doğrulama ve veritabanı yetki kuralları değişmez.
+
+## Yaklaşık katılımcı ili
+Odaya katıldıktan sonra tarayıcı ipwho.is servisine HTTPS isteği yapar. Yalnızca bölge/il ve ülke kodu saklanır; ham IP ve koordinatlar saklanmaz. Oturum başına bir sorgu yapılır. Başarısız sorgu katılımı engellemez. Veriler ayrı roomLocations alanındadır, yalnızca Google yöneticisi okuyabilir; oda temizlenirken bu kayıtlar da silinir. Konum ağ/VPN tahminidir, istemci tarafından bildirildiğinden kimlik veya güvenlik doğrulamasında kullanılmaz. Eski katılımcılar yeniden bağlanınca görünür. Ücretsiz servis günlük alan adı başına 1000 sorguyla sınırlıdır: https://ipwhois.io/documentation
