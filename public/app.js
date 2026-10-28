@@ -1,7 +1,7 @@
-import { createMessageQueue } from '/message-queue.js?v=a7defc4872102c29';
-import { WatchPlayer } from '/player.js?v=a7defc4872102c29';
-import { resolveMediaSource } from '/media-source.js?v=a7defc4872102c29';
-import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=a7defc4872102c29';
+import { createMessageQueue } from '/message-queue.js?v=6a639ffd7c46e1f7';
+import { WatchPlayer } from '/player.js?v=6a639ffd7c46e1f7';
+import { resolveMediaSource } from '/media-source.js?v=6a639ffd7c46e1f7';
+import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=6a639ffd7c46e1f7';
 const $ = selector => document.querySelector(selector);
 const video = $('#video');
 let roomId = location.pathname.match(/^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/)?.[1];
@@ -17,7 +17,7 @@ const player = new WatchPlayer(video, {
 let firebaseBackend;
 const backendReady = fetch('/app-config.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
   if (config.backend !== 'firebase') return;
-  const { createFirebaseBackend } = await import('/firebase-client.js?v=a7defc4872102c29');
+  const { createFirebaseBackend } = await import('/firebase-client.js?v=6a639ffd7c46e1f7');
   firebaseBackend = await createFirebaseBackend();
   const sweep = () => firebaseBackend.cleanupExpired().catch(() => {});
   sweep(); setInterval(sweep, 10 * 60 * 1000);

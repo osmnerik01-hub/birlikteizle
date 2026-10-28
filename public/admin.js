@@ -1,4 +1,5 @@
-import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=a7defc4872102c29';
+import { authErrorMessage } from '/admin-auth.js?v=6a639ffd7c46e1f7';
+import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=6a639ffd7c46e1f7';
 const $ = selector => document.querySelector(selector);
 let backend, selected, detail, cursor, rooms = [], toastTimer;
 function toast(message, error = false) { const el = $('#admin-toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 6000); }
@@ -6,6 +7,7 @@ const date = value => new Intl.DateTimeFormat('tr', { dateStyle: 'short', timeSt
 async function run(button, operation) { if (button) button.disabled = true; try { await operation(); } catch (error) { toast(error.message || 'İşlem tamamlanamadı.', true); } finally { if (button?.isConnected) button.disabled = false; } }
 function confirmAction(title, text) { const dialog = $('#confirm-dialog'); $('#confirm-title').textContent = title; $('#confirm-text').textContent = text; dialog.returnValue = ''; return new Promise(resolve => { dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true }); dialog.showModal(); }); }
 function identity(value) {
+  if (!value) return;
   $('#dashboard').hidden = !value.admin; $('#login-card').hidden = value.admin; $('#logout').hidden = !value.signedIn;
   $('#login-status').textContent = value.admin ? '' : value.signedIn ? `${value.email || 'Bu hesap'} yönetici olarak yetkilendirilmemiş. Doğru hesapla giriş yap.` : 'Yetkili Google hesabınla giriş yap.';
   $('#admin-email').textContent = value.email || '';
@@ -76,12 +78,20 @@ $('#toggle-room').onclick = event => run(event.currentTarget, () => perform('clo
 $('#clear-chat').onclick = event => run(event.currentTarget, async () => { if (await confirmAction('Sohbet temizlensin mi?', 'Bu odanın mesajları kalıcı olarak silinecek.')) await perform('clear-chat'); });
 $('#delete-room').onclick = event => run(event.currentTarget, async () => { if (await confirmAction('Oda kalıcı silinsin mi?', 'Katılımcılar, mesajlar ve izleme listesi silinecek. Bu işlem geri alınamaz.')) await perform('delete'); });
 $('#cleanup').onclick = event => run(event.currentTarget, async () => { const result = await backend.cleanup(); toast(`${result.removed} süresi dolan boş oda temizlendi.`); await loadRooms(true); });
-$('#google-login').onclick = event => run(event.currentTarget, async () => { try { identity(await backend.login()); } catch (error) { if (error.code === 'auth/operation-not-allowed') throw new Error('Firebase Authentication ayarlarında Google girişini etkinleştir.'); if (error.code === 'auth/unauthorized-domain') throw new Error('Bu siteyi Firebase Authentication yetkili alan adlarına ekle.'); throw error; } });
+function loginError(error) {
+  const message = authErrorMessage(error);
+  $('#login-status').textContent = message;
+  toast(message, true);
+}
+$('#google-login').onclick = event => run(event.currentTarget, async () => {
+  $('#login-status').textContent = 'Google girişi bekleniyor; açılan pencereden hesabını seç.';
+  try { identity(await backend.login()); } catch (error) { loginError(error); }
+});
 $('#logout').onclick = event => run(event.currentTarget, async () => { await backend.logout(); identity({ signedIn: false, admin: false }); });
 
 async function start() {
   const config = await (await fetch('/app-config.json', { cache: 'no-store' })).json();
-  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=a7defc4872102c29'); backend = createAdminBackend(); backend.watchIdentity(identity); }
+  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=6a639ffd7c46e1f7'); backend = createAdminBackend(); backend.watchIdentity(identity, loginError); }
   else {
     $('#google-login').hidden = true; $('#node-login').hidden = false; $('#login-status').textContent = 'Sunucunun ADMIN_TOKEN anahtarıyla giriş yap.';
     $('#login-description').textContent = 'Bu sunucunun yönetici anahtarıyla odaları yönetebilirsin. İzleme odasındaki misafir kimliğin korunur.';

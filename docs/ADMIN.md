@@ -41,3 +41,12 @@ Node tek süreçli ve SQLite kalıcı diskli kullanım içindir. Özel yönetim 
 `npm test`: Node admin API, ayrı izleyici izinleri, kontrol devri, eski heartbeat'in reddi, boş oda ve yükleme temizliği, aktif oda koruması; eklenti pencere/frame akışı ve kaynak sayfadan devralma.
 
 `npm run test:firebase`: Google admin kimliği, yetkisiz erişim, kendine izin verme, iznin geri alınması, sorgu sınırları, aktif/boş oda ayrımı ve iki gerçek Auth/Database emülatör istemcisiyle yetki devri. İstemciler emülatörün gerçek kuralları yüklü `demo-birlikteizle-default-rtdb` namespace'ini kullanır.
+
+
+## Google girişinde bağlantı ve pencere hataları
+
+Yönetim sayfası `Cross-Origin-Opener-Policy: same-origin-allow-popups` başlığıyla sunulur. Bu ayar yalnızca yönetim sayfasına uygulanır; Firebase Auth callback sayfalarının başlıkları değiştirilmez.
+
+Kayıtlı oturumun yüklenmesi ve veritabanından yönetici yetkisi kontrolü sınırsız beklemez. Yetki reddi ile bağlantı hatası farklı gösterilir. Bağlantı kesildiğinde hesap yanlışlıkla yetkisiz olarak etiketlenmez; yeniden giriş denenebilir. Açılır pencerenin engellenmesi, pencerenin kapatılması ve yetkisiz site adresi için ayrı açıklamalar vardır. Yönetici hesabının doğrulanmış Google kimliği ve veritabanı kuralları aynı şekilde zorunludur.
+
+Konsoldaki bir COOP uyarısı tek başına CORS veya başarısız giriş kanıtı değildir. Giriş tamamlanmıyorsa paneldeki durum mesajını ve Firebase hata kodunu esas alın. Çerezleri veya anonim izleyici kimliğini silmek gerekmez.

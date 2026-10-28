@@ -4,6 +4,7 @@ import { getDatabase, ref, get, set, update, remove, query, orderByValue, endAt,
 import { firebaseConfig } from '../public/firebase-config.js';
 import { ROOM_NAMESPACE, roomSnapshot } from './room-model.js';
 import { idleRoom, PERMISSIONS } from '../public/room-policy.js';
+import { checkAdminAccess, withAuthTimeout } from '../public/admin-auth.js';
 
 export function createAdminBackend(options = {}) {
   // A separate Auth instance keeps the viewer's anonymous room identity intact.
@@ -11,21 +12,36 @@ export function createAdminBackend(options = {}) {
   const auth = getAuth(app), db = getDatabase(app);
   if (options.emulators) { connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); connectDatabaseEmulator(db, '127.0.0.1', 9000); }
   const roomRef = (id, child = '') => ref(db, `${ROOM_NAMESPACE}/${id}${child ? `/${child}` : ''}`);
-  let authorized = false;
+  let authorized = false, pendingCheck;
   const requireAdmin = () => { if (!authorized) throw new Error('Bu hesap admin olarak yetkilendirilmemiş.'); };
   async function check() {
     authorized = false;
-    if (!auth.currentUser) return { signedIn: false, admin: false };
-    try { await get(ref(db, 'siteConfig')); authorized = true; } catch { /* Database rules are authoritative. */ }
-    return { signedIn: true, admin: authorized, email: auth.currentUser.email };
+    const user = auth.currentUser;
+    if (!user) return { signedIn: false, admin: false };
+    if (!pendingCheck || pendingCheck.uid !== user.uid) {
+      const promise = checkAdminAccess(() => get(ref(db, 'siteConfig')));
+      pendingCheck = { uid: user.uid, promise };
+      promise.finally(() => { if (pendingCheck?.promise === promise) pendingCheck = null; }).catch(() => {});
+    }
+    const admin = await pendingCheck.promise;
+    if (auth.currentUser?.uid !== user.uid) return null;
+    authorized = admin;
+    return { signedIn: true, admin, email: user.email };
   }
   return {
     async login() {
       const provider = new GoogleAuthProvider(); provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider); return check();
+      await withAuthTimeout(signInWithPopup(auth, provider), 120000, 'Google girişinden yanıt alınamadı. Giriş penceresini kapatıp yeniden dene.'); return check();
     },
     async logout() { authorized = false; await signOut(auth); },
-    watchIdentity(receive) { return onAuthStateChanged(auth, () => check().then(receive)); },
+    watchIdentity(receive, onError = () => {}) {
+      const timer = setTimeout(() => onError(new Error('Kayıtlı Google oturumu yüklenemedi. Giriş düğmesiyle tekrar dene.')), 15000);
+      const stop = onAuthStateChanged(auth, () => {
+        clearTimeout(timer);
+        check().then(value => { if (value) receive(value); }, onError);
+      }, error => { clearTimeout(timer); onError(error); });
+      return () => { clearTimeout(timer); stop(); };
+    },
     async listRooms(cursor) {
       requireAdmin();
       const constraints = [orderByValue()];
