@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, connectAuthEmulator } from 'firebase/auth';
-import { getDatabase, ref, get, set, update, remove, query, orderByValue, endAt, endBefore, limitToFirst, limitToLast, serverTimestamp, runTransaction, connectDatabaseEmulator } from 'firebase/database';
+import { getDatabase, ref, get, set, update, remove, query, orderByValue, endAt, endBefore, limitToFirst, limitToLast, serverTimestamp, runTransaction, connectDatabaseEmulator, forceLongPolling } from 'firebase/database';
 import { firebaseConfig } from '../public/firebase-config.js';
 import { ROOM_NAMESPACE, roomSnapshot } from './room-model.js';
 import { idleRoom, PERMISSIONS } from '../public/room-policy.js';
@@ -9,6 +9,9 @@ import { checkAdminAccess, withAuthTimeout } from '../public/admin-auth.js';
 export function createAdminBackend(options = {}) {
   // A separate Auth instance keeps the viewer's anonymous room identity intact.
   const app = initializeApp(options.config || firebaseConfig, options.appName || 'birlikte-site-admin');
+  // Admin actions are infrequent; HTTPS long polling also works on networks
+  // that block persistent WebSocket connections.
+  if (!options.emulators) forceLongPolling();
   const auth = getAuth(app), db = getDatabase(app);
   if (options.emulators) { connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true }); connectDatabaseEmulator(db, '127.0.0.1', 9000); }
   const roomRef = (id, child = '') => ref(db, `${ROOM_NAMESPACE}/${id}${child ? `/${child}` : ''}`);

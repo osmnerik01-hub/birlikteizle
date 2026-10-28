@@ -50,3 +50,6 @@ Yönetim sayfası `Cross-Origin-Opener-Policy: same-origin-allow-popups` başlı
 Kayıtlı oturumun yüklenmesi ve veritabanından yönetici yetkisi kontrolü sınırsız beklemez. Yetki reddi ile bağlantı hatası farklı gösterilir. Bağlantı kesildiğinde hesap yanlışlıkla yetkisiz olarak etiketlenmez; yeniden giriş denenebilir. Açılır pencerenin engellenmesi, pencerenin kapatılması ve yetkisiz site adresi için ayrı açıklamalar vardır. Yönetici hesabının doğrulanmış Google kimliği ve veritabanı kuralları aynı şekilde zorunludur.
 
 Konsoldaki bir COOP uyarısı tek başına CORS veya başarısız giriş kanıtı değildir. Giriş tamamlanmıyorsa paneldeki durum mesajını ve Firebase hata kodunu esas alın. Çerezleri veya anonim izleyici kimliğini silmek gerekmez.
+
+
+Yönetim panelinin veritabanı bağlantısı HTTPS long polling kullanır. WebSocket bağlantısının ağ veya tarayıcı tarafından engellendiği ortamlarda da çalışır. Firebase Hosting CSP politikasında Firebase veritabanı uçlarının script/iframe bağlantılarına izin verilmelidir; bu izinler Firebase SDK HTTP taşımasının gereğidir. Kimlik doğrulama ve veritabanı yetki kuralları değişmez.
