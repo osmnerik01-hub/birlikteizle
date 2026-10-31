@@ -1,9 +1,9 @@
-import { createMessageQueue } from '/message-queue.js?v=9d311e1d6f150493';
-import { WatchPlayer } from '/player.js?v=9d311e1d6f150493';
-import { resolveMediaSource } from '/media-source.js?v=9d311e1d6f150493';
-import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=9d311e1d6f150493';
-import { approximateLocation } from '/location.js?v=9d311e1d6f150493';
-import { createIncomingTracker, createChatSound } from '/chat-notifications.js?v=9d311e1d6f150493';
+import { createMessageQueue } from '/message-queue.js?v=fc021d3b801573b8';
+import { WatchPlayer } from '/player.js?v=fc021d3b801573b8';
+import { resolveMediaSource } from '/media-source.js?v=fc021d3b801573b8';
+import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=fc021d3b801573b8';
+import { approximateLocation } from '/location.js?v=fc021d3b801573b8';
+import { createIncomingTracker, createChatSound } from '/chat-notifications.js?v=fc021d3b801573b8';
 const $ = selector => document.querySelector(selector);
 const video = $('#video');
 const incomingMessage = createIncomingTracker(), chatSound = createChatSound();
@@ -37,7 +37,7 @@ const player = new WatchPlayer(video, {
 let firebaseBackend;
 const backendReady = fetch('/app-config.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
   if (config.backend !== 'firebase') return;
-  const { createFirebaseBackend } = await import('/firebase-client.js?v=9d311e1d6f150493');
+  const { createFirebaseBackend } = await import('/firebase-client.js?v=fc021d3b801573b8');
   firebaseBackend = await createFirebaseBackend();
   const sweep = () => firebaseBackend.cleanupExpired().catch(() => {});
   sweep(); setInterval(sweep, 10 * 60 * 1000);
