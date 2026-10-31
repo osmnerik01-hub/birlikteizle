@@ -1,10 +1,29 @@
-import { createMessageQueue } from '/message-queue.js?v=3f4b4b03edee3b19';
-import { WatchPlayer } from '/player.js?v=3f4b4b03edee3b19';
-import { resolveMediaSource } from '/media-source.js?v=3f4b4b03edee3b19';
-import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=3f4b4b03edee3b19';
-import { approximateLocation } from '/location.js?v=3f4b4b03edee3b19';
+import { createMessageQueue } from '/message-queue.js?v=9d311e1d6f150493';
+import { WatchPlayer } from '/player.js?v=9d311e1d6f150493';
+import { resolveMediaSource } from '/media-source.js?v=9d311e1d6f150493';
+import { permissionsFor, PERMISSIONS, controllerOf } from '/room-policy.js?v=9d311e1d6f150493';
+import { approximateLocation } from '/location.js?v=9d311e1d6f150493';
+import { createIncomingTracker, createChatSound } from '/chat-notifications.js?v=9d311e1d6f150493';
 const $ = selector => document.querySelector(selector);
 const video = $('#video');
+const incomingMessage = createIncomingTracker(), chatSound = createChatSound();
+let chatSoundEnabled = true;
+try { chatSoundEnabled = localStorage.getItem('bi-chat-sound') !== 'off'; } catch {}
+const soundButton = $('#chat-sound');
+function updateSoundButton() {
+  soundButton.textContent = chatSoundEnabled ? 'Ses açık' : 'Ses kapalı';
+  soundButton.setAttribute('aria-pressed', String(chatSoundEnabled));
+  soundButton.title = chatSoundEnabled ? 'Mesaj bildirim sesini kapat' : 'Mesaj bildirim sesini aç';
+}
+updateSoundButton();
+soundButton.onclick = () => {
+  chatSoundEnabled = !chatSoundEnabled;
+  try { localStorage.setItem('bi-chat-sound', chatSoundEnabled ? 'on' : 'off'); } catch {}
+  if (chatSoundEnabled) chatSound.unlock();
+  updateSoundButton();
+};
+// Browsers require a user gesture before audio can play.
+for (const type of ['pointerdown', 'keydown']) document.addEventListener(type, () => chatSound.unlock(), { capture: true });
 let roomId = location.pathname.match(/^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/)?.[1];
 let token, memberId, state, events, lastVideo, covered = true;
 let toastTimer, lastMessageIds = '', lastQueue = '', lastMembers = '';
@@ -18,7 +37,7 @@ const player = new WatchPlayer(video, {
 let firebaseBackend;
 const backendReady = fetch('/app-config.json', { cache: 'no-store' }).then(response => response.ok ? response.json() : { backend: 'node' }).then(async config => {
   if (config.backend !== 'firebase') return;
-  const { createFirebaseBackend } = await import('/firebase-client.js?v=3f4b4b03edee3b19');
+  const { createFirebaseBackend } = await import('/firebase-client.js?v=9d311e1d6f150493');
   firebaseBackend = await createFirebaseBackend();
   const sweep = () => firebaseBackend.cleanupExpired().catch(() => {});
   sweep(); setInterval(sweep, 10 * 60 * 1000);
@@ -74,6 +93,7 @@ function render(next) {
   if (membersKey !== lastMembers) { lastMembers = membersKey; renderMembers(next); }
   const queueKey = JSON.stringify(next.queue) + next.playback.videoId + can('manageQueue');
   if (queueKey !== lastQueue) { lastQueue = queueKey; renderQueue(next); }
+  if (incomingMessage(next.messages, memberId) && chatSoundEnabled) chatSound.play();
   const messageKey = next.messages.map(m => m.id).join(',');
   if (messageKey !== lastMessageIds) { lastMessageIds = messageKey; const content = $('#chat-content'); const nearBottom = content.scrollHeight - content.scrollTop - content.clientHeight < 120; $('#messages').replaceChildren(...next.messages.map(message => { const row = document.createElement('div'); row.className = `message-row${message.memberId === memberId ? ' own' : ''}`; row.append(avatar(message)); const body = document.createElement('div'); body.className = 'message-body'; const meta = document.createElement('div'); meta.className = 'message-meta'; const author = document.createElement('strong'); author.textContent = message.name + (message.memberId === memberId ? ' · sen' : ''); const time = document.createElement('time'); time.dateTime = new Date(message.at).toISOString(); time.textContent = new Intl.DateTimeFormat('tr', { hour: '2-digit', minute: '2-digit' }).format(message.at); meta.append(author, time); const text = document.createElement('p'); text.className = 'message-text'; text.textContent = message.text; body.append(meta, text); row.append(body); return row; })); if (nearBottom) content.scrollTop = content.scrollHeight; }
   const selected = next.queue.find(item => item.id === next.playback.videoId);
