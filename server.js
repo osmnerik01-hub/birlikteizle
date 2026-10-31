@@ -215,7 +215,7 @@ const server = http.createServer(async (req, res) => {
       res.setHeader('Cache-Control', 'private, no-store');
       file = path.join(uploadDir, path.basename(url.pathname));
     }
-    else if (['/chat-notifications.js', '/location.js', '/admin-auth.js', '/favicon.svg', '/message-queue.js', '/update-client.js', '/build-info.json', '/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
+    else if (['/chat-resize.js', '/chat-notifications.js', '/location.js', '/admin-auth.js', '/favicon.svg', '/message-queue.js', '/update-client.js', '/build-info.json', '/style.css', '/player.css', '/app.js', '/player.js', '/media-source.js', '/room-policy.js', '/admin.html', '/admin.css', '/admin.js', '/extension-client.js', '/extension-guide.html', '/birlikteizle-extension.zip'].includes(url.pathname) || /^\/assets\/[a-zA-Z0-9_.-]+\.js$/.test(url.pathname)) file = path.join(root, 'public', url.pathname.slice(1));
     else if (url.pathname === '/' || /^\/room\/([a-f0-9-]{8}|[a-f0-9-]{36})$/.test(url.pathname)) file = path.join(root, 'public', 'index.html');
     else fail('Sayfa bulunamadı.', 404);
     let info; try { info = await stat(file); } catch { fail('Dosya bulunamadı.', 404); }
