@@ -1,6 +1,6 @@
 # Firebase Spark ile yayınlama
 
-`your-firebase-project` bir örnek değerdir; kendi Firebase proje kimliğinizle değiştirin. Web yapılandırması `public/firebase-config.js` dosyasındadır. Bu yapılandırma tarayıcıya gönderilir; özel servis hesabı anahtarı içermez. Yetkilendirmeyi `database.rules.json` sağlar.
+Bu projedeki Firebase hedefi `example-project` olarak ayarlandı. Web yapılandırması `public/firebase-config.js` dosyasındadır. Bu yapılandırma tarayıcıya gönderilir; özel servis hesabı anahtarı içermez. Yetkilendirmeyi `database.rules.json` sağlar.
 
 ## İki çalışma biçimi
 
@@ -10,8 +10,8 @@
 ## Firebase konsolundaki ayarlar
 
 1. **Security → Authentication → Get started → Sign-in method → Anonymous** sağlayıcısını etkinleştir ve kaydet. Özel anahtar oluşturma gerekmez.
-2. **Realtime Database** bölümünde yapılandırmadaki `your-firebase-project-default-rtdb` veritabanının bulunduğunu doğrula. Yoksa veritabanını kur; herkese açık test kuralları kullanma.
-3. Authentication'ın Settings → Authorized domains listesinde `your-firebase-project.web.app` ve `your-firebase-project.firebaseapp.com` adreslerinin bulunduğunu doğrula.
+2. **Realtime Database** bölümünde yapılandırmadaki `example-project-default-rtdb` veritabanının bulunduğunu doğrula. Yoksa veritabanını kur; herkese açık test kuralları kullanma.
+3. Authentication'ın Settings → Authorized domains listesinde `example-project.web.app` ve `example-project.firebaseapp.com` adreslerinin bulunduğunu doğrula.
 
 ## Kuralların kurulması
 
@@ -22,7 +22,7 @@ Uygulama kendi verisini yalnızca `birlikteRooms` altında yazar. Oda bağlantı
 Yeni ve boş bir veritabanında incelenen kuralları yüklemek için:
 
 ```powershell
-npx firebase deploy --only database --project your-firebase-project
+npx firebase deploy --only database --project example-project
 ```
 
 `npm run deploy:firebase` yalnızca Hosting yayımlar; mevcut veritabanı kurallarını otomatik değiştirmez.
@@ -42,7 +42,7 @@ Ardından, mevcut Hosting sitesinin bu uygulama için kullanılacağını doğru
 npm run deploy:firebase
 ```
 
-Derleme yayınlamadan önce otomatik çalışır. Başarılı deploy çıktısı gerçek URL'yi verir; varsayılan hedef `https://your-firebase-project.web.app` adresidir. Deploy başarılı olmadan bu adres uygulamanın yayımlandığını kanıtlamaz.
+Derleme yayınlamadan önce otomatik çalışır. Başarılı deploy çıktısı gerçek URL'yi verir; varsayılan hedef `https://example-project.web.app` adresidir. Deploy başarılı olmadan bu adres uygulamanın yayımlandığını kanıtlamaz.
 
 ## Testler
 
@@ -52,14 +52,14 @@ npm run build:firebase
 npm run test:firebase
 ```
 
-Firebase emülatör testleri Java 21 gerektirir. Yalnızca `demo-birlikteizle` adlı yerel demo projesinde çalışırlar; gerçek Firebase hesabına veya canlı verilere bağlanmazlar. İlk emülatör çalıştırması resmi emülatör dosyalarını indirir.
+Firebase emülatör testleri Java 21 gerektirir. Yalnızca `example-project` adlı yerel demo projesinde çalışırlar; gerçek Firebase hesabına veya canlı verilere bağlanmazlar. İlk emülatör çalıştırması resmi emülatör dosyalarını indirir.
 
 Emülatör testleri; yetkisiz erişimi, sahiplik değiştirmeyi, kimlik sahteciliğini, mesaj/video şemasını, slot sınırlarını ve iki bağımsız kullanıcının sohbet/oynatma akışını doğrular.
 
 ## Spark sürümünün sınırları
 
 - Her odada 50 video ve son 150 mesaj tutulur; dolan mesaj slotunda en eski mesajın yerini yenisi alır. Eşzamanlı işlemler transaction ile korunur.
-- Boş odalar 24 saatlik hareketsizlikten sonra ziyaretçi tarafından başlatılan temizlikle silinebilir; ayrıntılar ADMIN.md içindedir.
+- Odalar ve katılımcı profilleri otomatik silinmez; Firebase kotaları konsoldan takip edilir.
 - Node sunucusundaki IP istek sınırları Firebase sürümünde yoktur. Mesaj arayüzündeki kısa bekleme kötü niyetli istemciye karşı sunucu koruması değildir. Bu sürüm güvenilen arkadaşlar arasında davet bağlantısıyla kullanım içindir; daha geniş kullanımda App Check, kötüye kullanım takibi ve sunucuda doğrulama ayrıca değerlendirilmelidir.
 - Anonim kimlik bu tarayıcıdaki Firebase Authentication oturumuna bağlıdır. Tarayıcı verilerini silmek sahipliğe erişimi kaybettirir. Aynı tarayıcının sekmeleri aynı kimliği kullanır; iki kişi testi için gizli pencere veya başka tarayıcı kullan.
 - Oda sahibi kapanırsa oynatma durur; otomatik yetki devri yoktur. İnternet kesilmesi veya arka plan sekmesinin aşırı yavaşlatılması durumunda son oynatma bildirimi 8 saniyeden eskiyse video duraklatılır.

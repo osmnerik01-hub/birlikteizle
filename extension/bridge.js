@@ -1,5 +1,5 @@
 (() => {
-  const origins = ['https://your-firebase-project.web.app', 'https://your-firebase-project.firebaseapp.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+  const origins = ['https://example-project.web.app', 'https://example-project.firebaseapp.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
   if (!origins.includes(location.origin) || window !== top) return;
   let disconnected = false;
   window.addEventListener('message', async event => {

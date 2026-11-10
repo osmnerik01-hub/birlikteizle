@@ -1,4 +1,4 @@
-export const APP_ORIGINS = new Set(['https://your-firebase-project.web.app', 'https://your-firebase-project.firebaseapp.com', 'http://localhost:3000', 'http://127.0.0.1:3000']);
+export const APP_ORIGINS = new Set(['https://example-project.web.app', 'https://example-project.firebaseapp.com', 'http://localhost:3000', 'http://127.0.0.1:3000']);
 export function isAppUrl(url) { try { return APP_ORIGINS.has(new URL(url).origin); } catch { return false; } }
 export function sourceUrl(value) {
   const url = new URL(value);

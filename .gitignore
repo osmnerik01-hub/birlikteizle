@@ -17,14 +17,4 @@ exports/
 
 github/
 
-# Local configuration, credentials and exports
-.env.*
-!.env.example
-exports/
-*.zip
-*service-account*.json
-*serviceAccount*.json
-*.pem
-*.key
-
 public/build-info.json

@@ -26,10 +26,10 @@ after(async () => { await stop(); if (directory && path.dirname(directory) === o
 
 test('rooms, identities and live events work for independent participants', async () => {
   const created = await post('', { title: 'Test odası' }); assert.equal(created.status, 201); room = created.data.id;
-  host = (await post(`/${room}/join`, { name: 'Owner' })).data;
+  host = (await post(`/${room}/join`, { name: 'PUBLIC_AUTHOR' })).data;
   guest = (await post(`/${room}/join`, { name: 'Arkadaş' })).data;
   assert.equal(host.room.host, host.memberId); assert.notEqual(host.token, guest.token);
-  const resumed = (await post(`/${room}/join`, { name: 'Owner', token: host.token })).data;
+  const resumed = (await post(`/${room}/join`, { name: 'PUBLIC_AUTHOR', token: host.token })).data;
   assert.equal(resumed.memberId, host.memberId); assert.equal(resumed.room.host, host.memberId);
   const controller = new AbortController();
   const stream = await fetch(`${base}/api/rooms/${room}/events`, { headers: { Authorization: `Bearer ${guest.token}` }, signal: controller.signal });
@@ -110,7 +110,7 @@ test('production rejects foreign origins and HTTP media; cookies protect event s
   const foreign = await fetch(`${base}/api/rooms`, { method: 'POST', headers: { Origin: 'https://attacker.example', 'Content-Type': 'application/json' }, body: '{}' });
   assert.equal(foreign.status, 403);
   assert.equal((await post(`/${room}/video`, { url: 'http://example.com/video.mp4' }, host.token)).status, 400);
-  const joined = await fetch(`${base}/api/rooms/${room}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://watch.example.test' }, body: JSON.stringify({ name: 'Owner', token: host.token }) });
+  const joined = await fetch(`${base}/api/rooms/${room}/join`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://watch.example.test' }, body: JSON.stringify({ name: 'PUBLIC_AUTHOR', token: host.token }) });
   const cookie = joined.headers.get('set-cookie'); assert.match(cookie, /HttpOnly/); assert.match(cookie, /SameSite=Strict/); assert.match(cookie, /Secure/); assert.match(cookie, /Path=\//);
   assert.equal((await fetch(`${base}/api/rooms/${room}/events?token=${host.token}`)).status, 401);
   const status = await fetch(`${base}/api/rooms/${room}/status`, { headers: { Cookie: `bi_${room}=${host.token}` } }); assert.equal(status.status, 200);
@@ -124,12 +124,12 @@ test('server restart preserves room, chat, uploads and owner identity without ra
   const payload = db.prepare('SELECT payload FROM rooms WHERE id=?').get(room).payload;
   assert.ok(!payload.includes(host.token)); assert.ok(!payload.includes(guest.token)); db.close();
   await start();
-  const restored = (await post(`/${room}/join`, { name: 'Owner', token: host.token })).data;
+  const restored = (await post(`/${room}/join`, { name: 'PUBLIC_AUTHOR', token: host.token })).data;
   assert.equal(restored.memberId, host.memberId); assert.equal(restored.room.host, host.memberId);
   assert.equal(restored.room.messages[0].text, '<script>hello</script>');
   assert.equal(restored.room.queue.at(-1).url, uploaded); assert.equal(restored.room.playback.playing, false);
   assert.ok(restored.room.playback.time >= 77 && restored.room.playback.time < 80);
-  const cookieResume = await fetch(`${base}/api/rooms/${room}/join`, { method: 'POST', headers: { Cookie: `bi_${room}=${host.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Owner' }) });
+  const cookieResume = await fetch(`${base}/api/rooms/${room}/join`, { method: 'POST', headers: { Cookie: `bi_${room}=${host.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'PUBLIC_AUTHOR' }) });
   assert.equal((await cookieResume.json()).memberId, host.memberId);
   const response = await fetch(`${base}${uploaded}`, { headers: { Authorization: `Bearer ${guest.token}` } }); assert.equal(await response.text(), 'test-video-content-for-range-check');
 });
@@ -139,7 +139,7 @@ test('upload size and total storage quotas reject excess without adding a queue 
   assert.equal(oversized.status, 413);
   const quota = await fetch(`${base}/api/rooms/${room}/upload?name=full.mp4`, { method: 'POST', headers: { Authorization: `Bearer ${host.token}` }, body: Buffer.alloc(1024 * 1024) });
   assert.equal(quota.status, 507);
-  const restored = (await post(`/${room}/join`, { name: 'Owner', token: host.token })).data;
+  const restored = (await post(`/${room}/join`, { name: 'PUBLIC_AUTHOR', token: host.token })).data;
   assert.equal(restored.room.queue.length, 4);
 });
 

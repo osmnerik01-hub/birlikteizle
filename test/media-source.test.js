@@ -9,9 +9,9 @@ test('media sources distinguish web pages, MKV containers, HLS and DASH manifest
   for (const url of ['javascript:alert(1)', 'file:///C:/test.mp4', 'https://user:pass@example.com/test.mp4', 'blob:https://example.com/abc']) assert.throws(() => resolveMediaSource(url));
 });
 test('extension only trusts the actual room origin and safe source schemes', () => {
-  assert.equal(isAppUrl('https://your-firebase-project.web.app/room/a'), true);
-  assert.equal(isAppUrl('https://your-firebase-project.web.app.evil.example/'), false);
-  for (const url of ['chrome://settings', 'file:///etc/passwd', 'javascript:alert(1)', 'https://user:pass@example.com/', 'https://your-firebase-project.web.app/']) assert.throws(() => sourceUrl(url));
+  assert.equal(isAppUrl('https://example-project.web.app/room/a'), true);
+  assert.equal(isAppUrl('https://example-project.web.app.evil.example/'), false);
+  for (const url of ['chrome://settings', 'file:///etc/passwd', 'javascript:alert(1)', 'https://user:pass@example.com/', 'https://example-project.web.app/']) assert.throws(() => sourceUrl(url));
 });
 test('extension commands cannot execute arbitrary actions and clamp media properties', () => {
   assert.throws(() => cleanCommand({ action: 'eval', code: 'alert(1)' }));

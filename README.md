@@ -5,8 +5,6 @@ Paylaşılabilir odalar, eşzamanlı video oynatma ve canlı sohbet uygulaması.
 ## Geliştirme
 
 ```powershell
-npm ci
-npm run build:firebase
 npm start
 ```
 
@@ -14,14 +12,14 @@ npm start
 
 ## İnternete dağıtma
 
-- Ücretsiz Google Firebase başlangıcı: [Firebase kurulum rehberi](docs/FIREBASE.md). Firebase ayarları örnek değerlerdir; kendi projenizle değiştirin. Hosting'de video URL'leri kullanılır; dosya yükleme kapalıdır. `npm ci` ve `npm run build:firebase` derlemeyi hazırlar.
+- Ücretsiz Google Firebase başlangıcı: [Firebase kurulum rehberi](docs/FIREBASE.md). Yapılandırma `example-project` projesine yöneliktir. Hosting'de video URL'leri kullanılır; dosya yükleme kapalıdır. `npm ci` ve `npm run build:firebase` derlemeyi hazırlar.
 - Kendi sunucun: Docker Compose, Caddy HTTPS ve kalıcı veri volume'ü hazırdır. Alan adı ve Linux sunucusu seçildikten sonra [.env.example](.env.example) üzerinden yapılandırılır. Yedekleme dahil adımlar [Node.js dağıtım rehberindedir](docs/DEPLOYMENT.md).
 
-Bu paylaşım kopyası herhangi bir canlı Firebase projesine bağlı değildir. Node.js + SQLite veya kendi Firebase projenizle çalıştırabilirsiniz.
+Firebase sürümü [example-project.web.app](https://example-project.web.app) adresinde yayımlanmıştır. Aşağıdaki SQLite/dosya depolama özellikleri Node.js sürümünü açıklar; Firebase sürümünün sınırları ayrı rehberindedir.
 
 ## Özellikler
 
-- [Kaynak oynatıcı eklentisi ve kurulum](public/extension-guide.html): web sayfasındaki HTML5 oynatıcıyı kaynak sekmede algılama ve oda komutlarıyla eşitleme.
+- [Kaynak oynatıcı eklentisi ve kurulum](https://example-project.web.app/extension-guide.html): web sayfasındaki HTML5 oynatıcıyı kaynak sekmede algılama ve oda komutlarıyla eşitleme.
 - Tam ekranda hareketsizken gizlenen özel kontroller, 10 saniye sarma, ses ve altyazı menüleri. HLS/DASH manifestlerinin sunduğu alternatif kayıtlar arasında geçiş.
 - Teknik destek kapsamı ve doğrulama sınırları: [oynatıcı/eklenti rehberi](docs/PLAYER-AND-EXTENSION.md).
 
@@ -63,11 +61,6 @@ Bu sürüm tek uygulama süreci içindir; çok sunucuya dağıtım için ortak v
 
 Web sayfası ekleyip listeden seçtikten sonra her katılımcı **Kaynak penceresini aç** düğmesini kullanır. Video kendi sitesinde oynar; odanın kontrolleri kaynak penceresini ve diğer katılımcının konumunu yönetir. Güncel eklenti paketini kurup oda/kaynak sayfalarını yenileyin. Algılanan HLS’i odaya aktarma kaldırıldı; eski HLS girdisi yerine bölümün web sayfasını ekleyin. Ayrıntılar: [oynatıcı ve eklenti](docs/PLAYER-AND-EXTENSION.md).
 
-### Yönetim ve izleyici yetkileri (0.5.2)
+### Yönetim ve izleyici yetkileri (0.5.0)
 
-[Site yönetim paneli](public/admin.html), Google hesabına bağlı site admini, bağımsız video ekleme/liste yönetimi/oynatma yetkileri ve boş oda temizliği eklendi. Ayrıntılar, ücretsiz planın temizlik koşulları ve testler [ADMIN.md](docs/ADMIN.md) dosyasındadır. Kaynak penceresinden yetkili izleyici kontrolü için eklentiyi 0.5.2 sürümüne güncelleyin.
-
-
-## Paylaşım kopyası ve yapılandırma
-
-Bu kaynak paketi kişisel Firebase ayarları, kullanıcı verileri veya Git geçmişi içermez. Kurulum adımları için [SETUP.md](SETUP.md) dosyasına bakın. Bağımlılıklar ve üretilmiş dosyalar pakete dahil değildir; ilk çalıştırmadan önce derleme gereklidir.
+[Site yönetim paneli](https://example-project.web.app/admin.html), Google hesabına bağlı site admini, bağımsız video ekleme/liste yönetimi/oynatma yetkileri ve boş oda temizliği eklendi. Ayrıntılar, ücretsiz planın temizlik koşulları ve testler [ADMIN.md](docs/ADMIN.md) dosyasındadır. Kaynak penceresinden yetkili izleyici kontrolü için eklentiyi 0.5.0 sürümüne güncelleyin.

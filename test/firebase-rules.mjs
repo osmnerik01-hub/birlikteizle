@@ -9,7 +9,7 @@ let env;
 const id = '2a7b0c58-0cda-42ab-8e9d-71f274feeb44';
 const p = `birlikteRooms/${id}`;
 before(async () => {
-  env = await initializeTestEnvironment({ projectId: 'demo-birlikteizle', database: { host: '127.0.0.1', port: 9000, rules: await readFile('database.rules.json', 'utf8') } });
+  env = await initializeTestEnvironment({ projectId: 'example-project', database: { host: '127.0.0.1', port: 9000, rules: await readFile('database.rules.json', 'utf8') } });
 });
 after(async () => { await env?.cleanup(); });
 const db = uid => uid ? env.authenticatedContext(uid).database() : env.unauthenticatedContext().database();

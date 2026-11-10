@@ -40,7 +40,7 @@ Node tek süreçli ve SQLite kalıcı diskli kullanım içindir. Özel yönetim 
 
 `npm test`: Node admin API, ayrı izleyici izinleri, kontrol devri, eski heartbeat'in reddi, boş oda ve yükleme temizliği, aktif oda koruması; eklenti pencere/frame akışı ve kaynak sayfadan devralma.
 
-`npm run test:firebase`: Google admin kimliği, yetkisiz erişim, kendine izin verme, iznin geri alınması, sorgu sınırları, aktif/boş oda ayrımı ve iki gerçek Auth/Database emülatör istemcisiyle yetki devri. İstemciler emülatörün gerçek kuralları yüklü `demo-birlikteizle-default-rtdb` namespace'ini kullanır.
+`npm run test:firebase`: Google admin kimliği, yetkisiz erişim, kendine izin verme, iznin geri alınması, sorgu sınırları, aktif/boş oda ayrımı ve iki gerçek Auth/Database emülatör istemcisiyle yetki devri. İstemciler emülatörün gerçek kuralları yüklü `example-project-default-rtdb` namespace'ini kullanır.
 
 
 ## Google girişinde bağlantı ve pencere hataları

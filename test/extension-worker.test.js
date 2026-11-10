@@ -13,7 +13,7 @@ test('extension binds only room-opened tabs, forwards commands to the detected i
     windows: { create: async value => { calls.push(['window', value]); return { id: 90, tabs: [{ id: nextTab++ }] }; }, update: async (...args) => calls.push(['focus', ...args]), get: async id => ({ id, state: 'normal' }) }
   };
   const { handleMessage } = await import('../extension/background.js');
-  const app = { tab: { id: 7 }, frameId: 0, url: 'https://your-firebase-project.web.app/room/test' };
+  const app = { tab: { id: 7 }, frameId: 0, url: 'https://example-project.web.app/room/test' };
   await assert.rejects(handleMessage({ source: 'birlikte-app', action: 'OPEN_SOURCE', url: 'https://example.com/episode' }, { ...app, url: 'https://evil.example/' }), /erişim/);
   await handleMessage({ source: 'birlikte-app', action: 'OPEN_SOURCE', url: 'https://example.com/episode' }, app);
   assert.equal(bindings[40].appTabId, 7);

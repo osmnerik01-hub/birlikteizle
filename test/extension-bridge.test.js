@@ -6,7 +6,7 @@ import { readFile } from 'node:fs/promises';
 for (const asynchronous of [false, true]) test(`bridge handles ${asynchronous ? 'rejected' : 'synchronously invalidated'} extension context`, async () => {
   let handler, calls = 0; const replies = [];
   const window = { addEventListener: (_, fn) => handler = fn, postMessage: message => replies.push(message) };
-  const origin = 'https://your-firebase-project.web.app';
+  const origin = 'https://example-project.web.app';
   vm.runInNewContext(await readFile('extension/bridge.js', 'utf8'), { window, top: window, location: { origin }, chrome: { runtime: { id: "test-extension",
     onMessage: { addListener() {} }, sendMessage() { calls++; const error = new Error('Extension context invalidated.'); if (asynchronous) return Promise.reject(error); throw error; }
   } } });
@@ -19,7 +19,7 @@ for (const asynchronous of [false, true]) test(`bridge handles ${asynchronous ? 
 test('bridge never calls an invalidated runtime with a missing extension id', async () => {
   let handler, calls = 0; const replies = [];
   const window = { addEventListener: (_, fn) => handler = fn, postMessage: message => replies.push(message) };
-  const origin = 'https://your-firebase-project.web.app';
+  const origin = 'https://example-project.web.app';
   const runtime = { id: 'installed', onMessage: { addListener() {} }, sendMessage() { calls++; throw new Error('must not call'); } };
   vm.runInNewContext(await readFile('extension/bridge.js', 'utf8'), { window, top: window, location: { origin }, chrome: { runtime } });
   runtime.id = undefined;

@@ -32,7 +32,7 @@ test('two source windows follow room play, seek and pause through the worker and
   };
   try {
     const { handleMessage } = await import('../extension/background.js?two-source-sync');
-    const room = id => ({ tab: { id, windowId: id + 10 }, frameId: 0, url: 'https://your-firebase-project.web.app/room/test' });
+    const room = id => ({ tab: { id, windowId: id + 10 }, frameId: 0, url: 'https://example-project.web.app/room/test' });
     const url = 'https://example.com/episode';
     for (const id of [7, 8]) await handleMessage({ source: 'birlikte-app', action: 'OPEN_SOURCE', url }, room(id));
     const detector = await readFile('extension/source.js', 'utf8');

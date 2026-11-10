@@ -1,5 +1,5 @@
-import { authErrorMessage } from '/admin-auth.js?v=db1d950e4ef90192';
-import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=db1d950e4ef90192';
+import { authErrorMessage } from '/admin-auth.js?v=5b984f8598b4e993';
+import { PERMISSIONS, permissionsFor } from '/room-policy.js?v=5b984f8598b4e993';
 const $ = selector => document.querySelector(selector);
 let backend, selected, detail, cursor, rooms = [], toastTimer;
 function toast(message, error = false) { const el = $('#admin-toast'); el.textContent = message; el.classList.toggle('error', error); el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 6000); }
@@ -95,7 +95,7 @@ $('#logout').onclick = event => run(event.currentTarget, async () => { await bac
 
 async function start() {
   const config = await (await fetch('/app-config.json', { cache: 'no-store' })).json();
-  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=db1d950e4ef90192'); backend = createAdminBackend(); backend.watchIdentity(identity, loginError); }
+  if (config.backend === 'firebase') { const { createAdminBackend } = await import('/admin-client.js?v=5b984f8598b4e993'); backend = createAdminBackend(); backend.watchIdentity(identity, loginError); }
   else {
     $('#google-login').hidden = true; $('#node-login').hidden = false; $('#login-status').textContent = 'Sunucunun ADMIN_TOKEN anahtarıyla giriş yap.';
     $('#login-description').textContent = 'Bu sunucunun yönetici anahtarıyla odaları yönetebilirsin. İzleme odasındaki misafir kimliğin korunur.';

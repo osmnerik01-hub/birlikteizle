@@ -8,13 +8,13 @@ async function until(predicate) {
 }
 
 test('two Firebase clients create a room, exchange chat and synchronize video through real rules', { timeout: 60000 }, async () => {
-  const config = { apiKey: 'demo-api-key', projectId: 'demo-birlikteizle', databaseURL: 'https://demo-birlikteizle-default-rtdb.firebaseio.com' };
+  const config = { apiKey: 'demo-api-key', projectId: 'example-project', databaseURL: 'https://example-project-default-rtdb.firebaseio.com' };
   const host = await createFirebaseBackend({ config, appName: 'host-client', emulators: true });
   const guest = await createFirebaseBackend({ config, appName: 'guest-client', emulators: true });
   let hostState, guestState, failure;
   try {
     const { id } = await host.request('create');
-    const joinedHost = await host.request('join', id, { name: 'Owner' });
+    const joinedHost = await host.request('join', id, { name: 'PUBLIC_AUTHOR' });
     const joinedGuest = await guest.request('join', id, { name: 'Arkadaş' });
     assert.notEqual(joinedHost.memberId, joinedGuest.memberId);
     host.subscribe(id, state => hostState = state, () => {}, error => failure = error);
